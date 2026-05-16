@@ -1,0 +1,13 @@
+{
+  "name": "collocation-monster-battle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Classroom collocation battle game with live rooms.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -169,3 +169,11 @@ Students join a teacher room by link, enter their names, and take turns fighting
 - Updated the app to prefer the generated ElevenLabs `hey-ya.mp3` voice cue before falling back to browser speech synthesis.
 - Updated the audit script to fail PNGs without alpha channels.
 - Updated the Gemini prompt to request flat chroma-key fallback if true transparency is unavailable.
+
+### 2026-05-17 01:35 +07 - Dokploy deployment setup
+
+- Added `package.json` with `npm start` as the production entrypoint.
+- Added a root `Dockerfile` using Node 22 Alpine, `PORT=3000`, non-root runtime, and a `/health` healthcheck.
+- Added `.dockerignore` so local scratch files, secrets, and generated unaudited assets are not copied into the deploy image.
+- Added `/health` to `server.js` for Dokploy/container health checks.
+- Documented the Dokploy settings in `README.md`.

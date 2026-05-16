@@ -95,6 +95,12 @@ function sendJson(res, status, payload) {
 
 function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
+
+  if (url.pathname === "/health") {
+    sendJson(res, 200, { ok: true, uptime: process.uptime() });
+    return;
+  }
+
   const requested = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
   const filePath = path.normalize(path.join(ROOT, requested));
   if (!filePath.startsWith(ROOT)) {
