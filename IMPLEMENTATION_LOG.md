@@ -177,3 +177,12 @@ Students join a teacher room by link, enter their names, and take turns fighting
 - Added `.dockerignore` so local scratch files, secrets, and generated unaudited assets are not copied into the deploy image.
 - Added `/health` to `server.js` for Dokploy/container health checks.
 - Documented the Dokploy settings in `README.md`.
+
+### 2026-05-17 03:13 +07 - Dokploy production deployment
+
+- Created Dokploy application service `Collocation Monster Battle` in the `testing / production` environment.
+- Connected GitHub repository `vyto-dol/collocation-monster-battle`, branch `main`.
+- Set build type to `Dockerfile`, Docker file `Dockerfile`, and Docker context `.`.
+- Added production domain `collocation-monster-battle.dol.vn` with HTTPS via Let's Encrypt and container port `3000`.
+- Triggered a manual deployment for commit `48866687ee6cb5c2c48a54f21efceaef2118ba84`; Dokploy reported the deployment as `done`.
+- Verified `https://collocation-monster-battle.dol.vn/` returns HTTP 200 and `/health` returns `{ "ok": true }`.
