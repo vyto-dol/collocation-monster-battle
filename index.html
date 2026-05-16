@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collocation Monster Battle</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" id="landingView">
+        <div class="brand-block">
+          <p class="eyebrow">Sports Collocations</p>
+          <h1>Monster Battle</h1>
+          <p class="intro">Choose the right verb before the timer runs out.</p>
+        </div>
+
+        <div class="entry-panel">
+          <div class="tabs" role="tablist" aria-label="Choose mode">
+            <button class="tab active" type="button" data-mode="teacher">Teacher</button>
+            <button class="tab" type="button" data-mode="student">Student</button>
+          </div>
+
+          <form id="teacherForm" class="mode-form">
+            <label>
+              Room code
+              <input id="teacherRoom" name="room" maxlength="16" autocomplete="off" />
+            </label>
+            <button class="primary-action" type="submit">Create Battle</button>
+          </form>
+
+          <form id="studentForm" class="mode-form hidden">
+            <label>
+              Your name
+              <input id="studentName" name="name" maxlength="24" required autocomplete="name" />
+            </label>
+            <label>
+              Room code
+              <input id="studentRoom" name="room" maxlength="16" required autocomplete="off" />
+            </label>
+            <button class="primary-action" type="submit">Join Room</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="battle hidden" id="battleView" aria-live="polite">
+        <div id="phaserStage" class="phaser-stage" aria-hidden="true"></div>
+        <div class="battle-bg legacy-fallback" aria-hidden="true"></div>
+        <div class="scene-motion" aria-hidden="true">
+          <div class="sprite-layer heroes-sprite"></div>
+          <div class="sprite-layer monster-sprite"></div>
+          <div class="energy-ring heroes-energy"></div>
+          <div class="energy-ring monster-energy"></div>
+          <div class="skill-shot hero-shot"></div>
+          <div class="skill-shot monster-shot"></div>
+          <div class="sport-attack-prop" id="sportAttackProp"></div>
+          <div class="slash-mark"></div>
+          <div class="impact-burst" id="impactBurst"></div>
+        </div>
+        <div class="cry-face" aria-hidden="true"><span>HUHU</span></div>
+        <div class="sad-face monster-sad-face" aria-hidden="true"><span>ouch</span></div>
+        <div class="sad-face heroes-sad-face" aria-hidden="true"><span>oh no</span></div>
+
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Room <span id="roomCodeLabel"></span></p>
+            <h2 id="screenTitle">Teacher Console</h2>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-action" id="musicToggleBtn" type="button">Music Off</button>
+            <button class="ghost-action" id="copyLinkBtn" type="button">Copy Join Link</button>
+            <button class="ghost-action" id="leaveBtn" type="button">Exit</button>
+          </div>
+        </header>
+
+        <div class="health-row">
+          <div class="health-card">
+            <span>Class</span>
+            <div class="meter"><i id="classHpBar"></i></div>
+            <strong id="classHpText">100/100</strong>
+          </div>
+          <div class="health-card monster-health">
+            <span>Monster</span>
+            <div class="meter"><i id="monsterHpBar"></i></div>
+            <strong id="monsterHpText">100/100</strong>
+          </div>
+        </div>
+
+        <article class="question-card">
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="turn-meta">
+            <span class="turn-student" id="turnStudent">
+              <span class="student-avatar">?</span>
+              <span class="student-name">Waiting for players</span>
+            </span>
+            <span class="timer" id="timerText">5</span>
+          </div>
+          <div class="prompt-stage">
+            <span class="prompt-label">Sport card</span>
+            <div class="sport-visual">
+              <img id="sportImage" alt="" />
+            </div>
+            <h3 id="sportPrompt">Add students to start</h3>
+          </div>
+          <div class="options" id="options">
+            <button type="button" data-answer="play"><span>play</span></button>
+            <button type="button" data-answer="go"><span>go</span></button>
+            <button type="button" data-answer="do"><span>do</span></button>
+          </div>
+          <p class="feedback" id="feedback">Teacher starts the first turn when the class is ready.</p>
+          <button class="primary-action" id="nextTurnBtn" type="button">Start Turn</button>
+        </article>
+
+        <div class="result-overlay" id="resultOverlay">
+          <p id="resultText">Direct hit!</p>
+          <button class="primary-action" id="overlayNextBtn" type="button">Next Turn</button>
+        </div>
+
+        <aside class="side-panel" id="sidePanel">
+          <section>
+            <div class="panel-heading">
+              <h3>Roster</h3>
+              <span id="playerCount">0</span>
+            </div>
+            <ul id="rosterList" class="roster"></ul>
+          </section>
+
+          <details id="answerKeyPanel">
+            <summary>Answer Key</summary>
+            <dl class="answer-key" id="answerKey"></dl>
+          </details>
+
+          <details id="teacherControlsPanel">
+            <summary>Teacher Controls</summary>
+            <div class="admin-actions">
+              <button class="ghost-action" id="resetBattleBtn" type="button">Reset Battle</button>
+              <button class="ghost-action danger" id="clearRoomBtn" type="button">Clear Room</button>
+            </div>
+          </details>
+        </aside>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="./assets/phaser.min.js"></script>
+    <script src="./phaser-scene.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
