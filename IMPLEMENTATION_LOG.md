@@ -186,3 +186,11 @@ Students join a teacher room by link, enter their names, and take turns fighting
 - Added production domain `collocation-monster-battle.dol.vn` with HTTPS via Let's Encrypt and container port `3000`.
 - Triggered a manual deployment for commit `48866687ee6cb5c2c48a54f21efceaef2118ba84`; Dokploy reported the deployment as `done`.
 - Verified `https://collocation-monster-battle.dol.vn/` returns HTTP 200 and `/health` returns `{ "ok": true }`.
+
+### 2026-05-17 03:32 +07 - Room sync hardening
+
+- Confirmed there was no explicit 9-student limit in the UI or server.
+- Added a dedicated `POST /api/:room/join` endpoint so student joins merge one player into the room instead of uploading a full, potentially stale room state.
+- Hardened regular room state saves to preserve already-joined players unless the teacher explicitly clears the room.
+- Added SSE heartbeat pings and disabled proxy buffering for event streams to reduce cases where student screens miss the current question after an idle connection.
+- Tested 12 simultaneous joins locally; the server retained all 12 players, and a stale state update did not shrink the roster.

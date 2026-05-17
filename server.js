@@ -6,6 +6,7 @@ const PORT = Number(process.env.PORT || 4173);
 const ROOT = __dirname;
 const rooms = new Map();
 const clients = new Map();
+const HEARTBEAT_MS = 15000;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -51,10 +52,39 @@ function getRoom(roomCode) {
 
 function setRoom(roomCode, state) {
   const cleanCode = roomCode.toUpperCase();
+  const currentState = rooms.get(cleanCode);
   const nextState = { ...defaultState(cleanCode), ...state, roomCode: cleanCode, updatedAt: Date.now() };
+
+  if (currentState && Array.isArray(state.players) && !(state.status === "lobby" && state.players.length === 0)) {
+    const playersById = new Map(currentState.players.map((player) => [player.id, player]));
+    state.players.forEach((player) => playersById.set(player.id, { ...playersById.get(player.id), ...player }));
+    nextState.players = [...playersById.values()];
+  }
+
   rooms.set(cleanCode, nextState);
   broadcast(cleanCode, nextState);
   return nextState;
+}
+
+function joinRoom(roomCode, player) {
+  const cleanCode = roomCode.toUpperCase();
+  const currentState = getRoom(cleanCode);
+  if (!player?.id || !player?.name) return currentState;
+
+  const currentPlayer = currentState.players.find((item) => item.id === player.id);
+  const nextPlayer = {
+    turnsTaken: 0,
+    correct: 0,
+    wrong: 0,
+    ...currentPlayer,
+    ...player,
+    name: String(player.name).trim().slice(0, 24),
+  };
+  const players = currentPlayer
+    ? currentState.players.map((item) => (item.id === player.id ? nextPlayer : item))
+    : [...currentState.players, nextPlayer];
+
+  return setRoom(cleanCode, { ...currentState, players });
 }
 
 function broadcast(roomCode, state) {
@@ -150,12 +180,23 @@ const server = http.createServer(async (req, res) => {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-store",
         Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
       });
       res.write(`data: ${JSON.stringify(getRoom(roomCode))}\n\n`);
+      const heartbeat = setInterval(() => res.write(": ping\n\n"), HEARTBEAT_MS);
       const roomClients = clients.get(roomCode) || new Set();
       roomClients.add(res);
       clients.set(roomCode, roomClients);
-      req.on("close", () => roomClients.delete(res));
+      req.on("close", () => {
+        clearInterval(heartbeat);
+        roomClients.delete(res);
+      });
+      return;
+    }
+
+    if (req.method === "POST" && action === "join") {
+      const body = await readJson(req);
+      sendJson(res, 200, joinRoom(roomCode, body.player || body));
       return;
     }
 

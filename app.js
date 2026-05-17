@@ -181,6 +181,31 @@ function saveState(nextState, broadcast = true) {
   render();
 }
 
+async function joinPlayer(player) {
+  if (!SERVER_MODE) {
+    const existing = state.players.find((item) => item.id === player.id);
+    const players = existing
+      ? state.players.map((item) => (item.id === player.id ? { ...item, ...player } : item))
+      : [...state.players, player];
+    saveState({ ...state, players }, true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/${encodeURIComponent(roomCode)}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player }),
+    });
+    if (!response.ok) throw new Error("Room join failed");
+    state = normalizeState(roomCode, await response.json());
+    localStorage.setItem(roomKey(roomCode), JSON.stringify(state));
+    render();
+  } catch {
+    showToast("Could not join live room. Try refreshing.");
+  }
+}
+
 function setMode(mode) {
   els.tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
   els.teacherForm.classList.toggle("hidden", mode !== "teacher");
@@ -197,11 +222,7 @@ async function joinRoom(nextRole, code, name = "") {
     studentId = sessionStorage.getItem(`${roomKey(roomCode)}:studentId`) || makeId();
     sessionStorage.setItem(`${roomKey(roomCode)}:studentId`, studentId);
     const cleanName = name.trim().slice(0, 24);
-    const existing = state.players.find((player) => player.id === studentId);
-    const players = existing
-      ? state.players.map((player) => (player.id === studentId ? { ...player, name: cleanName } : player))
-      : [...state.players, { id: studentId, name: cleanName, turnsTaken: 0, correct: 0, wrong: 0 }];
-    saveState({ ...state, players }, true);
+    await joinPlayer({ id: studentId, name: cleanName, turnsTaken: 0, correct: 0, wrong: 0 });
   }
 
   els.landing.classList.add("hidden");
