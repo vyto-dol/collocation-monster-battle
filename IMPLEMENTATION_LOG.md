@@ -200,3 +200,4 @@ Students join a teacher room by link, enter their names, and take turns fighting
 - Production stress testing showed simultaneous join requests could still race when multiple requests read the same room state before any write completed.
 - Added a per-room write queue in `server.js` so `join` and full `state` updates are serialized for the same room.
 - Re-tested 30 simultaneous local joins; the server retained all 30 players.
+- Added `APP_VERSION=room-sync-2026-05-17-v2` to the Docker image and `/health` response so production cache/rebuild state can be verified explicitly.

@@ -4,6 +4,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV APP_VERSION=room-sync-2026-05-17-v2
 
 COPY package*.json ./
 RUN npm install --omit=dev --ignore-scripts

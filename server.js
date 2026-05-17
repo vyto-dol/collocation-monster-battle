@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = Number(process.env.PORT || 4173);
+const APP_VERSION = process.env.APP_VERSION || "local-dev";
 const ROOT = __dirname;
 const rooms = new Map();
 const clients = new Map();
@@ -141,7 +142,7 @@ function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === "/health") {
-    sendJson(res, 200, { ok: true, uptime: process.uptime() });
+    sendJson(res, 200, { ok: true, version: APP_VERSION, uptime: process.uptime() });
     return;
   }
 
