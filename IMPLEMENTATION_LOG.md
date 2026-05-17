@@ -194,3 +194,9 @@ Students join a teacher room by link, enter their names, and take turns fighting
 - Hardened regular room state saves to preserve already-joined players unless the teacher explicitly clears the room.
 - Added SSE heartbeat pings and disabled proxy buffering for event streams to reduce cases where student screens miss the current question after an idle connection.
 - Tested 12 simultaneous joins locally; the server retained all 12 players, and a stale state update did not shrink the roster.
+
+### 2026-05-17 19:53 +07 - Concurrent room write lock
+
+- Production stress testing showed simultaneous join requests could still race when multiple requests read the same room state before any write completed.
+- Added a per-room write queue in `server.js` so `join` and full `state` updates are serialized for the same room.
+- Re-tested 30 simultaneous local joins; the server retained all 30 players.

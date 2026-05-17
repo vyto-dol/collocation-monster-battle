@@ -6,6 +6,7 @@ const PORT = Number(process.env.PORT || 4173);
 const ROOT = __dirname;
 const rooms = new Map();
 const clients = new Map();
+const roomLocks = new Map();
 const HEARTBEAT_MS = 15000;
 
 const MIME = {
@@ -85,6 +86,19 @@ function joinRoom(roomCode, player) {
     : [...currentState.players, nextPlayer];
 
   return setRoom(cleanCode, { ...currentState, players });
+}
+
+async function withRoomLock(roomCode, operation) {
+  const cleanCode = roomCode.toUpperCase();
+  const previous = roomLocks.get(cleanCode) || Promise.resolve();
+  const current = previous.catch(() => {}).then(operation);
+  roomLocks.set(cleanCode, current);
+
+  try {
+    return await current;
+  } finally {
+    if (roomLocks.get(cleanCode) === current) roomLocks.delete(cleanCode);
+  }
 }
 
 function broadcast(roomCode, state) {
@@ -196,13 +210,15 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && action === "join") {
       const body = await readJson(req);
-      sendJson(res, 200, joinRoom(roomCode, body.player || body));
+      const nextState = await withRoomLock(roomCode, () => joinRoom(roomCode, body.player || body));
+      sendJson(res, 200, nextState);
       return;
     }
 
     if (req.method === "POST" && action === "state") {
       const body = await readJson(req);
-      sendJson(res, 200, setRoom(roomCode, body.state || body));
+      const nextState = await withRoomLock(roomCode, () => setRoom(roomCode, body.state || body));
+      sendJson(res, 200, nextState);
       return;
     }
 
